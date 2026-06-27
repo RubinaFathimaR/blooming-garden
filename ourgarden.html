@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Garden For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400&family=Dancing+Script:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#FDF6EC;--beige:#F0E8D8;--sage:#8FAF8A;--sage-light:#B8CDB5;--sage-dark:#5E7A5A;
+  --dusty-pink:#D4A5A0;--dusty-pink-light:#E8C5C0;--warm-brown:#8B6F5E;--warm-brown-light:#C4A898;
+  --text-main:#5A4035;--text-light:#8B7066;--gold:#C9A96E;
+  --sky-day:linear-gradient(180deg,#C8DFF5 0%,#E8F4FD 40%,#F5EEE0 100%);
+  --sky-night:linear-gradient(180deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+}
+body{
+  font-family:'Lato',sans-serif;
+  min-height:100vh;background:var(--cream);
+  overflow-x:hidden;
+}
+#welcome{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--cream);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:20px;transition:opacity 1.5s ease;
+}
+#welcome.fade-out{opacity:0;pointer-events:none;}
+.welcome-paper{
+  background:white;border-radius:20px;padding:48px 52px;max-width:520px;width:90%;
+  border:1px solid var(--beige);text-align:center;
+  box-shadow:0 4px 32px rgba(139,111,94,0.1);
+  animation:riseUp 1.2s ease forwards;
+}
+@keyframes riseUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.welcome-arabic{
+  font-family:'Playfair Display',serif;font-size:2rem;color:var(--warm-brown);
+  margin-bottom:8px;font-style:italic;letter-spacing:1px;
+}
+.welcome-sub{font-size:.95rem;color:var(--text-light);line-height:1.7;margin-bottom:28px;}
+.welcome-btn{
+  background:var(--sage);color:white;border:none;
+  padding:14px 36px;border-radius:50px;font-family:'Dancing Script',cursive;
+  font-size:1.1rem;cursor:pointer;transition:all .3s;
+  box-shadow:0 2px 12px rgba(143,175,138,0.4);
+}
+.welcome-btn:hover{background:var(--sage-dark);transform:translateY(-2px);}
+.welcome-flowers{font-size:1.8rem;letter-spacing:8px;opacity:.7;animation:sway 3s ease-in-out infinite;}
+@keyframes sway{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+#garden{
+  min-height:100vh;position:relative;overflow:hidden;
+  transition:background 2s ease;
+}
+.sky{
+  position:absolute;inset:0;
+  background:var(--sky-day);
+  transition:background 3s ease;
+}
+.sky.night{background:var(--sky-night);}
+.cloud{
+  position:absolute;opacity:.7;
+  animation:floatCloud linear infinite;
+}
+.cloud svg{filter:drop-shadow(0 2px 8px rgba(255,255,255,.3));}
+@keyframes floatCloud{from{transform:translateX(-200px)}to{transform:translateX(110vw)}}
+.ground{
+  position:absolute;bottom:0;left:0;right:0;
+  height:42%;background:linear-gradient(180deg,#7CAD6E 0%,#5E8F52 40%,#4A7340 100%);
+  border-radius:60% 60% 0 0 / 30px 30px 0 0;
+}
+.ground-texture{
+  position:absolute;top:0;left:0;right:0;height:24px;
+  background:repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(255,255,255,.04) 20px,rgba(255,255,255,.04) 21px);
+}
+.path{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:100px;height:60%;
+  background:linear-gradient(180deg,#C4A57A,#D4B585);
+  clip-path:polygon(25% 0,75% 0,100% 100%,0% 100%);
+  opacity:.6;
+}
+.tree-wrap{
+  position:absolute;bottom:38%;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;transition:transform .3s;
+  z-index:10;
+}
+.tree-wrap:hover{transform:translateX(-50%) scale(1.03);}
+.tree-trunk{
+  width:18px;height:var(--trunk-h,60px);
+  background:linear-gradient(90deg,#6B4423,#8B6043,#6B4423);
+  border-radius:4px;transition:height 1s ease;
+}
+.tree-canopy{
+  width:var(--canopy-w,80px);height:var(--canopy-h,90px);
+  background:radial-gradient(circle at 40% 40%,#4A8A3E,#2E6B25);
+  border-radius:50% 50% 40% 40%;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  transition:width 1s,height 1s;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;
+}
+.tree-label{
+  position:absolute;bottom:-28px;
+  font-family:'Dancing Script',cursive;font-size:.8rem;
+  color:var(--warm-brown);white-space:nowrap;
+  background:rgba(255,255,255,.85);padding:2px 10px;border-radius:20px;
+}
+.flower-slot{
+  position:absolute;cursor:pointer;
+  transition:transform .3s;
+}
+.flower-slot:hover{transform:scale(1.2) translateY(-4px);}
+.flower-svg{transition:all .8s ease;}
+.flower-slot.locked .flower-svg{opacity:.25;filter:grayscale(1);}
+.flower-day-badge{
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+  font-size:.6rem;color:var(--text-light);
+  background:rgba(255,255,255,.85);padding:1px 6px;border-radius:20px;
+  white-space:nowrap;opacity:0;transition:.3s;
+}
+.flower-slot.locked:hover .flower-day-badge{opacity:1;}
+.deco{position:absolute;cursor:pointer;z-index:8;transition:transform .3s;}
+.deco:hover{transform:scale(1.15);}
+#moon{
+  position:absolute;top:28px;right:60px;font-size:2.4rem;
+  cursor:pointer;transition:all .5s;opacity:0;z-index:20;
+}
+#moon.visible{opacity:1;}
+#moon:hover{transform:scale(1.2) rotate(10deg);}
+#sun{
+  position:absolute;top:22px;right:60px;font-size:2.8rem;
+  cursor:pointer;animation:sunPulse 4s ease-in-out infinite;z-index:20;
+  filter:drop-shadow(0 0 12px rgba(255,200,50,.5));
+}
+@keyframes sunPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.sparkle{
+  position:absolute;pointer-events:none;
+  animation:sparkleFade var(--dur,3s) ease-in-out infinite;
+  font-size:var(--sz,.8rem);opacity:0;
+}
+@keyframes sparkleFade{
+  0%{opacity:0;transform:translateY(0) rotate(0deg)}
+  30%{opacity:.9}
+  70%{opacity:.7}
+  100%{opacity:0;transform:translateY(-30px) rotate(180deg)}
+}
+.star{
+  position:absolute;background:white;border-radius:50%;
+  animation:twinkle var(--dur,2s) ease-in-out infinite;
+  opacity:0;transition:opacity 2s;
+}
+.star.visible{opacity:var(--op,.8);}
+@keyframes twinkle{0%,100%{transform:scale(1);opacity:var(--op,.6)}50%{transform:scale(1.4);opacity:1}}
+.firefly{
+  position:absolute;width:4px;height:4px;
+  background:#E8F87A;border-radius:50%;
+  animation:firefly var(--dur,4s) ease-in-out infinite;
+  opacity:0;
+  box-shadow:0 0 6px 2px rgba(232,248,122,.6);
+}
+.firefly.night-visible{opacity:1;}
+@keyframes firefly{
+  0%{transform:translate(0,0);opacity:.8}
+  25%{transform:translate(var(--dx1,20px),var(--dy1,-15px));opacity:1}
+  50%{transform:translate(var(--dx2,-10px),var(--dy2,10px));opacity:.6}
+  75%{transform:translate(var(--dx3,15px),var(--dy3,-20px));opacity:.9}
+  100%{transform:translate(0,0);opacity:.8}
+}
+.bird{
+  position:absolute;font-size:1rem;
+  animation:birdFly var(--dur,8s) linear infinite;
+  opacity:.8;
+}
+@keyframes birdFly{from{transform:translateX(-80px)}to{transform:translateX(110vw)}}
+.butterfly{
+  position:absolute;cursor:pointer;font-size:1.4rem;
+  animation:flutter var(--dur,6s) ease-in-out infinite;
+  z-index:8;
+}
+@keyframes flutter{
+  0%,100%{transform:translate(0,0) rotate(-5deg)}
+  33%{transform:translate(var(--dx,20px),var(--dy,-18px)) rotate(5deg)}
+  66%{transform:translate(var(--dx2,-15px),var(--dy2,12px)) rotate(-3deg)}
+}
+#bench{position:absolute;bottom:33%;left:15%;cursor:pointer;font-size:2.5rem;z-index:6;}
+#bench:hover{filter:brightness(1.1);}
+#cat{position:absolute;bottom:35%;right:14%;cursor:pointer;font-size:1.8rem;z-index:6;
+  animation:catSit 4s ease-in-out infinite;}
+@keyframes catSit{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.lantern{
+  position:absolute;font-size:1.6rem;
+  animation:lanternSway 3s ease-in-out infinite;opacity:0;transition:opacity 2s;
+}
+.lantern.visible{opacity:1;}
+@keyframes lanternSway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+#modal-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(90,64,53,.35);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s;
+  padding:16px;
+}
+#modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-paper{
+  background:linear-gradient(145deg,#FFFDF8,#FBF5E8);
+  border-radius:20px;max-width:500px;width:100%;max-height:88vh;overflow-y:auto;
+  border:1px solid rgba(196,168,152,.3);
+  padding:36px 36px 28px;
+  transform:scale(.9) translateY(20px);transition:transform .4s ease;
+  position:relative;
+  box-shadow:0 20px 60px rgba(90,64,53,.2);
+}
+#modal-overlay.open .modal-paper{transform:scale(1) translateY(0);}
+.modal-close{
+  position:absolute;top:16px;right:18px;
+  background:none;border:none;cursor:pointer;
+  font-size:1.2rem;color:var(--text-light);transition:.2s;
+}
+.modal-close:hover{color:var(--warm-brown);transform:scale(1.2);}
+.modal-type-badge{
+  display:inline-block;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 12px;border-radius:20px;margin-bottom:16px;
+  font-family:'Lato',sans-serif;font-weight:400;
+}
+.badge-quran{background:#E8F0E0;color:#4A6B3E;}
+.badge-dua{background:#E8E8F5;color:#4A4A8B;}
+.badge-letter{background:#F5E8E8;color:#8B4A4A;}
+.badge-memory{background:#F5F0E0;color:#8B7A3A;}
+.badge-motivation{background:#E0F0F5;color:#3A6B8B;}
+.badge-wellness{background:#F0E8F5;color:#6B3A8B;}
+.modal-title{
+  font-family:'Dancing Script',cursive;font-size:1.8rem;
+  color:var(--warm-brown);margin-bottom:16px;line-height:1.3;
+}
+.modal-body{
+  font-family:'Lato',sans-serif;font-size:.95rem;color:var(--text-main);
+  line-height:1.85;
+}
+.modal-body p{margin-bottom:12px;}
+.modal-source{
+  margin-top:20px;padding-top:16px;border-top:1px solid var(--beige);
+  font-size:.8rem;color:var(--text-light);font-style:italic;
+}
+.modal-emoji{font-size:2.2rem;margin-bottom:12px;display:block;}
+.arabic-text{
+  font-family:'Playfair Display',serif;font-size:1.3rem;
+  color:var(--warm-brown);text-align:right;line-height:2;
+  margin-bottom:12px;direction:rtl;
+}
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:white;border:1px solid var(--beige);
+  border-radius:50px;padding:10px 24px;
+  font-family:'Dancing Script',cursive;font-size:1rem;color:var(--warm-brown);
+  box-shadow:0 4px 20px rgba(139,111,94,.15);
+  z-index:3000;transition:transform .4s ease;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#hud{
+  position:absolute;top:16px;left:16px;z-index:20;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(6px);
+  border-radius:16px;padding:10px 16px;border:1px solid rgba(196,168,152,.3);
+}
+.hud-day{font-family:'Dancing Script',cursive;font-size:1.1rem;color:var(--warm-brown);}
+.hud-label{font-size:.7rem;color:var(--text-light);margin-top:2px;}
+.album-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px;}
+.album-photo{
+  aspect-ratio:4/3;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:2rem;
+  background:linear-gradient(135deg,var(--beige),var(--dusty-pink-light));
+  border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.1);
+  font-family:'Lato',sans-serif;text-align:center;padding:8px;font-size:.8rem;
+  color:var(--text-main);
+}
+.modal-paper::-webkit-scrollbar{width:4px;}
+.modal-paper::-webkit-scrollbar-track{background:transparent;}
+.modal-paper::-webkit-scrollbar-thumb{background:var(--beige);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div id="welcome">
+  <div class="welcome-paper">
+    <div class="welcome-flowers">🌸 🌿 🌼</div>
+    <div style="margin:20px 0 8px">
+      <div class="welcome-arabic">Assalamu Alaikum</div>
+      <div style="font-family:'Lato',sans-serif;font-size:.8rem;color:var(--text-light);margin-top:4px">وعليكم السلام ورحمة الله</div>
+    </div>
+    <p class="welcome-sub">
+      Dearest Hamshi — I made you a little garden.<br>
+      A peaceful place that grows a little more with you, every single day.<br>
+      <span style="color:var(--sage-dark);font-style:italic">Come in whenever your heart needs rest.</span>
+    </p>
+    <button class="welcome-btn" onclick="enterGarden()">✿ Enter the Garden</button>
+  </div>
+  <div style="font-family:'Dancing Script',cursive;color:var(--text-light);font-size:.9rem;margin-top:16px">
+    with all my love, your little sister rubina - the most amazing🤍
+  </div>
+</div>
+
+<div id="garden" style="display:none">
+  <div class="sky" id="sky"></div>
+  <div id="stars-layer"></div>
+  <div id="clouds-layer"></div>
+  <div id="sun">☀️</div>
+  <div id="moon" onclick="openMoon()">🌙</div>
+  <div id="lanterns-layer"></div>
+  <div id="birds-layer"></div>
+  <div id="sparkles-layer"></div>
+  <div class="ground">
+    <div class="ground-texture"></div>
+    <div class="path"></div>
+  </div>
+  <div class="tree-wrap" id="tree" onclick="openTree()">
+    <div class="tree-canopy" id="tree-canopy">🌸</div>
+    <div class="tree-trunk" id="tree-trunk"></div>
+    <div class="tree-label" id="tree-label">our tree</div>
+  </div>
+  <div id="hud">
+    <div class="hud-day" id="hud-day">Day 1</div>
+    <div class="hud-label" id="hud-label">of your garden</div>
+  </div>
+  <div id="flowers-layer"></div>
+  <div id="bench" onclick="openBench()">🪑</div>
+  <div id="cat" onclick="catMeow()">🐱</div>
+  <div id="butterflies-layer"></div>
+  <div id="fireflies-layer"></div>
+</div>
+
+<div id="modal-overlay" onclick="closeModalOverlay(event)">
+  <div class="modal-paper" id="modal-paper">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <span class="modal-emoji" id="modal-emoji"></span>
+    <span class="modal-type-badge" id="modal-badge"></span>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-source" id="modal-source"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const CONTENT = [
+  {type:'quran',emoji:'📖',title:'Al-Baqarah 2:286',badge:'badge-quran',label:'Qur\'an',
+   arabic:'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
+   body:'Allah does not burden a soul beyond that it can bear. It will have the consequence of what good it has gained, and it will bear the consequence of what evil it has earned.',
+   source:'Surah Al-Baqarah, 2:286 — a reminder that every difficulty you carry, you were made strong enough to hold it.'},
+  {type:'letter',emoji:'💌',title:'A Little Letter',badge:'badge-letter',label:'From your sister',
+   body:`<p>Motuuu,</p><p>Germany feels so far sometimes. But I want you to know — every time the clock hits 12 here(mera lunch time), I think: <em>is she awake yet?</em> why hasn't she replied?</p><p>You worked so hard to get where you are. I used to watch you study for hours while I was busy being annoying in the background 😅 — and look at you now.</p><p>You make me want to be braver. Every single day.</p><p style="text-align:right;font-family:'Dancing Script',cursive;font-size:1.2rem">— your pyari behen🤍</p>`,
+   source:''},
+  {type:'memory',emoji:'😂',title:'Remember the little mermaid movie day?',badge:'badge-memory',label:'Shared memory',
+   body:`<p>YOU MADE ME WEAR CHAPPALS I DIDNT LIKE AND I WANTED TO CRY😭</p><p>Maybe i overreacted but that's not the point ok? like u HAD to get on my nerve didnt you?</p>`,
+   source:'circa summer 2014, a crime never forgotten'},
+  {type:'dua',emoji:'🤲',title:'Dua for Ease',badge:'badge-dua',label:'Dua',
+   arabic:'اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلاً',
+   body:'O Allah, nothing is easy except what You make easy, and You make the difficult, if You wish, easy.',
+   source:'Reported by Ibn Hibban — recite this whenever something feels heavy, motu.'},
+  {type:'motivation',emoji:'🌟',title:'You are already enough',badge:'badge-motivation',label:'For your heart',
+   body:`<p>Tu rathi over karna stop kar. Tu already bhout zyada karleko hai so tu daba</p><p>Rathi mere sirke admiyan ke baremein sooch hamein paap manje bhi rathi achieve karne cheezan rakh</p><p>Tu ek topper and ek hardworking insaan who makes mamma dada so proud</p><p><em>"So stop doing over ah ok? you got this!"</em></p>`,
+   source:'Sahih Muslim 2626 — even your small acts of kindness matter infinitely.'},
+  {type:'wellness',emoji:'🌿',title:'Rest is sacred too',badge:'badge-wellness',label:'Gentle reminder',
+   body:`<p>Hey. When did you last workout?</p><p>Today, please: open a window. Breathe for a moment. Eat something warm.</p><p>Your body is carrying you through so much. It deserves some gentleness too.</p><p>Islam teaches us that we have a duty to our own selves — taking care of yourself is not selfish. It is an act of gratitude for the body Allah gave you.</p>`,
+   source:''},
+  {type:'quran',emoji:'📖',title:'Ash-Sharh 94:5-6',badge:'badge-quran',label:'Qur\'an',
+   arabic:'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۞ إِنَّ مَعَ الْعُسْرِ يُسْرًا',
+   body:'For indeed, with hardship will be ease. Indeed, with hardship will be ease.',
+   source:'Surah Ash-Sharh, 94:5-6 — He said it twice. That\'s how certain it is, Apu.'},
+  {type:'letter',emoji:'💌',title:'Things I never say out loud',badge:'badge-letter',label:'From your sister',
+   body:`<p>I am proud of you. Like, embarrassingly proud. I tell my friends about you constantly 😌</p><p>"My sister is in Germany studying..." "My akka just cooked this amazing thing..." They literally know sm abt u now.</p><p>I know we don't always say these things in our family. So I am saying it here, in your garden, where it is safe:</p><p><strong>I love you. You are one kaka bcs u never reply back</strong></p>`,
+   source:'always and forever'},
+  {type:'memory',emoji:'🌧️',title:'That one power cut',badge:'badge-memory',label:'Shared memory',
+   body:`<p>Remember the long power cut when we moved to mary helen? We lit all the candles and talked for so long bcs all phones were dead.</p><p>We painted stuff even dida bashi were here.</p><p>You spilled water on my photo bw -_-</p>`,
+   source:'The night we finished all the candles in the house'},
+  {type:'dua',emoji:'🤲',title:'Dua for the morning',badge:'badge-dua',label:'Dua',
+   arabic:'أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ',
+   body:'We have entered the morning, and the whole kingdom of Allah has entered the morning. Praise be to Allah. None has the right to be worshipped but Allah, alone, without partner.',
+   source:'Abu Dawud 5076 — a beautiful way to begin each day in Germany, Apu. The same sky covers us both.'},
+  {type:'motivation',emoji:'✨',title:'What I see when I look at you',badge:'badge-motivation',label:'For your heart',
+   body:`<p>Someone who moved to a different country alone and figured it out.</p><p>Someone who calls mamma and abba every day without fail (somehow forgets me).</p><p>Someone who still makes time for salah when life gets hard.</p><p>Someone who sends me voice notes at weird hours because she thought of something funny.</p><p>Someone who is, genuinely, one of the most remarkable people I know.</p><p>That is you, hamshu. Now u better be crying</p>`,
+   source:''},
+  {type:'wellness',emoji:'🌙',title:'A bedtime note',badge:'badge-wellness',label:'Gentle reminder',
+   body:`<p>If you are reading this late: please put the phone down soon.</p><p>You do not need to solve everything tonight. The ppt can wait. The worry can rest. Allah is watching over everything while you sleep.</p><p>Say your duas. Lie down. Let tomorrow come on its own.</p><p>You deserve the kindness of a quiet night, motu. 🌙</p>`,
+   source:''},
+  {type:'quran',emoji:'📖',title:'Al-Imran 3:139',badge:'badge-quran',label:'Qur\'an',
+   arabic:'وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ',
+   body:'Do not weaken and do not grieve, and you will be superior if you are true believers.',
+   source:'Surah Al-Imran, 3:139 — on the hard days, come back to this one.'},
+];
+
+const BUTTERFLY_MESSAGES = [
+  "You are doing better than you think 🌸",
+  "A little butterfly flew here just to check on you 💛",
+  "Something beautiful is coming your way ✨",
+  "Tu ek bomb cheez 💣",
+  "You make us proud every single day motu",
+  "You are so loved — from here to Germany and back 🌍",
+  "Allah has not forgotten you, not even for a moment 🤍",
+  "With hardship comes ease, so trust allah 🎀",
+  "You are mom's favourite and we both know it 😌",
+  "Rest is allowed. Joy is allowed. You are allowed. 🌿",
+  "The bravest thing you can do today: be gentle with yourself 🦋",
+];
+
+const MILESTONE_LETTERS = {
+  30: {emoji:'🌳',title:'One Month — you came back!',badge:'badge-letter',label:'Milestone letter',
+    body:`<p>Thirty days of our garden. I want to sit down and write you something real.</p><p>One month ago I was terrified to send this to you. What if it was too cheesy? What if the flowers didn't work? But the most important thing was: I wanted you to have something that was just for you. In a language we've always spoken between us — half words, half feelings.</p><p>Thank you for visiting. Every single time you opened this, it was like a hug across the distance.</p><p>One month down. A whole garden to grow. 🌸</p>`,
+    source:'30 days of love, one flower at a time'},
+  100: {emoji:'🌲',title:'One Hundred Days',badge:'badge-letter',label:'Milestone letter',
+    body:`<p>One hundred, Apu.</p><p>Do you know what that means? You came here, to this tiny little garden I made you, one hundred times. Maybe on good days. Maybe on hard ones. Maybe on ordinary Tuesdays when nothing much happened.</p><p>I hope it was a place you could breathe in. Even for two minutes.</p><p>A hundred days of you. A hundred days of me thinking of you. That's the most beautiful thing.</p>`,
+    source:'100 days and counting 🌿'},
+  365: {emoji:'🌳',title:'One Whole Year 🎉',badge:'badge-letter',label:'Milestone letter',
+    body:`<p>A year.</p><p>Nadia Apu — we made it through a whole year. You in Germany, me here, both of us growing in different soils.</p><p>I started this because I missed you. I kept adding to it because it made me feel close to you. I don't know if I'll ever be able to say in person the things I say in this garden — but I hope you know them now.</p><p>You are my sister, my role model, my favourite person to text at 2am about nothing. I love you with everything I have.</p><p>Here's to another year of our garden. 🌸</p>`,
+    source:'Year One — many more to come, in sha Allah'},
+};
+
+const FLOWER_POSITIONS=[
+  {left:'12%',bottom:'38%'},{left:'22%',bottom:'35%'},{left:'32%',bottom:'33%'},
+  {left:'68%',bottom:'33%'},{left:'78%',bottom:'35%'},{left:'88%',bottom:'38%'},
+  {left:'8%',bottom:'43%'},{left:'18%',bottom:'40%'},
+  {left:'82%',bottom:'40%'},{left:'92%',bottom:'43%'},
+  {left:'27%',bottom:'42%'},{left:'73%',bottom:'42%'},
+  {left:'38%',bottom:'36%'},{left:'62%',bottom:'36%'},
+];
+
+const FLOWER_SVGS=[
+  (c)=>`<svg width="36" height="44" viewBox="0 0 36 44"><circle cx="18" cy="28" r="5" fill="#C4A898"/><circle cx="18" cy="16" r="7" fill="${c}"/><circle cx="10" cy="20" r="6" fill="${c}"/><circle cx="26" cy="20" r="6" fill="${c}"/><circle cx="12" cy="28" r="5" fill="${c}"/><circle cx="24" cy="28" r="5" fill="${c}"/><circle cx="18" cy="20" r="5" fill="#FFF8F0"/><rect x="16" y="32" width="4" height="12" rx="2" fill="#6B9A60"/></svg>`,
+  (c)=>`<svg width="32" height="48" viewBox="0 0 32 48"><ellipse cx="16" cy="16" rx="6" ry="10" fill="${c}"/><ellipse cx="6" cy="22" rx="5" ry="8" fill="${c}" transform="rotate(-30 6 22)"/><ellipse cx="26" cy="22" rx="5" ry="8" fill="${c}" transform="rotate(30 26 22)"/><circle cx="16" cy="20" r="5" fill="#FDE8C0"/><rect x="14" y="32" width="4" height="16" rx="2" fill="#6B9A60"/></svg>`,
+  (c)=>`<svg width="34" height="46" viewBox="0 0 34 46"><polygon points="17,8 20,18 30,18 22,24 25,34 17,28 9,34 12,24 4,18 14,18" fill="${c}"/><circle cx="17" cy="22" r="4" fill="#FFF0D0"/><rect x="15" y="34" width="4" height="12" rx="2" fill="#6B9A60"/></svg>`,
+  (c)=>`<svg width="30" height="44" viewBox="0 0 30 44"><ellipse cx="15" cy="12" rx="5" ry="9" fill="${c}"/><ellipse cx="7" cy="18" rx="5" ry="8" fill="${c}" transform="rotate(-45 7 18)"/><ellipse cx="23" cy="18" rx="5" ry="8" fill="${c}" transform="rotate(45 23 18)"/><ellipse cx="15" cy="26" rx="5" ry="8" fill="${c}" transform="rotate(20 15 26)"/><circle cx="15" cy="18" r="4" fill="#FFE0D0"/><rect x="13" y="30" width="4" height="14" rx="2" fill="#6B9A60"/></svg>`,
+];
+
+const FLOWER_COLORS=['#D4A5A0','#C4A5D4','#A5C4D4','#D4C4A5','#A5D4A5','#D4B4A0','#B4A5D4','#D4A5B4','#A5B4D4','#D4D4A5','#C4B4D4','#A5D4C4','#D4C4B4','#B4D4A5'];
+
+function getStoredDate(){
+  try{return localStorage.getItem('garden_first_visit');}catch(e){return null;}
+}
+function setStoredDate(d){
+  try{localStorage.setItem('garden_first_visit',d);}catch(e){}
+}
+function getDayNumber(){
+  const stored=getStoredDate();
+  if(!stored){
+    const today=new Date().toISOString().split('T')[0];
+    setStoredDate(today);return 1;
+  }
+  const diff=Math.floor((Date.now()-new Date(stored).getTime())/(1000*60*60*24));
+  return Math.max(1,diff+1);
+}
+
+function isNight(){
+  const h=new Date().getHours();return h<6||h>=20;
+}
+
+function buildFlowers(dayNum){
+  const layer=document.getElementById('flowers-layer');
+  layer.innerHTML='';
+  FLOWER_POSITIONS.forEach((pos,i)=>{
+    const unlocked=i<dayNum;
+    const div=document.createElement('div');
+    div.className='flower-slot'+(unlocked?'':' locked');
+    div.style.cssText=`left:${pos.left};bottom:${pos.bottom};position:absolute;z-index:5;`;
+    const svgFn=FLOWER_SVGS[i%FLOWER_SVGS.length];
+    const col=FLOWER_COLORS[i%FLOWER_COLORS.length];
+    div.innerHTML=`<div class="flower-svg">${svgFn(col)}</div><div class="flower-day-badge">Day ${i+1}</div>`;
+    if(unlocked){
+      const contentIdx=i%CONTENT.length;
+      div.onclick=()=>openModal(CONTENT[contentIdx]);
+    }
+    layer.appendChild(div);
+  });
+}
+
+function growTree(dayNum){
+  const trunk=document.getElementById('tree-trunk');
+  const canopy=document.getElementById('tree-canopy');
+  const h=Math.min(40+dayNum*1.2,140);
+  const cw=Math.min(70+dayNum*0.8,160);
+  const ch=Math.min(80+dayNum*0.9,180);
+  trunk.style.cssText=`width:18px;height:${h}px;background:linear-gradient(90deg,#6B4423,#8B6043,#6B4423);border-radius:4px;transition:height 1s ease;`;
+  canopy.style.cssText=`width:${cw}px;height:${ch}px;background:radial-gradient(circle at 40% 40%,#4A8A3E,#2E6B25);border-radius:50% 50% 40% 40%;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:width 1s,height 1s;display:flex;align-items:center;justify-content:center;font-size:1.5rem;`;
+  if(dayNum>=365)canopy.textContent='🌳';
+  else if(dayNum>=100)canopy.textContent='🌲';
+  else if(dayNum>=30)canopy.textContent='🌴';
+  else canopy.textContent='🌸';
+}
+
+function openTree(){
+  const dayNum=getDayNumber();
+  let milestone=null;
+  if(dayNum>=365)milestone=MILESTONE_LETTERS[365];
+  else if(dayNum>=100)milestone=MILESTONE_LETTERS[100];
+  else if(dayNum>=30)milestone=MILESTONE_LETTERS[30];
+  if(milestone){
+    openModal(milestone);
+  }else{
+    showToast(`Day ${dayNum} — ${Math.max(0,30-dayNum)} more days to the first milestone 🌱`);
+  }
+}
+
+function openModal(c){
+  document.getElementById('modal-emoji').textContent=c.emoji||'🌸';
+  document.getElementById('modal-badge').className='modal-type-badge '+(c.badge||'badge-letter');
+  document.getElementById('modal-badge').textContent=c.label||'';
+  document.getElementById('modal-title').textContent=c.title||'';
+  let body='';
+  if(c.arabic)body+=`<div class="arabic-text">${c.arabic}</div>`;
+  body+=c.body||'';
+  document.getElementById('modal-body').innerHTML=body;
+  const src=document.getElementById('modal-source');
+  src.textContent=c.source||'';
+  src.style.display=c.source?'block':'none';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeModalOverlay(e){if(e.target===document.getElementById('modal-overlay'))closeModal();}
+
+function openMoon(){
+  openModal({
+    emoji:'🌙',title:'Bedtime',badge:'badge-dua',label:'Dua',
+    arabic:'بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا',
+    body:'In Your name, O Allah, I die and I live — a beautiful dua to say as you close your eyes tonight.<br><br>May your dreams be gentle, Apu. May tomorrow be kinder than today. 🌙',
+    source:'Sahih Bukhari 6324'
+  });
+}
+
+function openBench(){
+  const photos=[
+    {icon:'🌸',label:'Decemeber 2006 - The day you saw me first and were mesmerised'},
+    {icon:'🍽️',label:"Random dance offs - You still dance funny lol"},
+    {icon:'✈️',label:"Airport goodbye - It was pretty chaotic but I still remeber how happy you were"},
+    {icon:'📚',label:'Study nights — Thank you for traumatising me'},
+    {icon:'🌙',label:'Podcast worthy talk - We definitely need to start on'},
+    {icon:'💌',label:'The broken agreements - I am holding you accountable for those'},
+  ];
+  const grid=photos.map(p=>`<div class="album-photo">${p.icon}<br><span style="font-size:.75rem;margin-top:6px;display:block;color:var(--text-light)">${p.label}</span></div>`).join('');
+  openModal({
+    emoji:'📷',title:'<3',badge:'badge-memory',label:'Our karname',
+    body:`<p style="font-size:.85rem;color:var(--text-light)">A few of my favourite memories of us ✨</p><div class="album-grid">${grid}</div>`,
+    source:'More to come, every time we make new ones 🤍'
+  });
+}
+
+function catMeow(){
+  const sounds=[
+    'Meow! 🐱 (I also miss you, says the garden cat)',
+    'Purrrr... the cat says hello from far away 🐾',
+    'please go take a shower',
+    'izzat se reply karo ^-^',
+    'rubina bashayer are with ur shaadi ka dance btw',
+    'Mraow! You came back! The cat is pleased. 😸',
+    '*intense staring* The cat thinks you should eat something. 🍵',
+    'over attitude dikhao mat, the cat is watching',
+    'The cat thinks you should stop worrying',
+    'why is your hair like that',
+    'meow, meow me meowwwwwwwwwwwwwwwwww',
+    'oh baby doll mein sone di',
+  ];
+  showToast(sounds[Math.floor(Math.random()*sounds.length)]);
+}
+
+function buildButterflies(){
+  const layer=document.getElementById('butterflies-layer');
+  layer.innerHTML='';
+  for(let i=0;i<3;i++){
+    const el=document.createElement('div');
+    el.className='butterfly';
+    el.style.cssText=`left:${15+i*25}%;top:${20+i*8}%;--dur:${5+i*2}s;--dx:${15+i*5}px;--dy:${-12-i*3}px;--dx2:${-10-i*2}px;--dy2:${8+i*2}px`;
+    el.textContent='🦋';
+    el.onclick=()=>showToast(BUTTERFLY_MESSAGES[Math.floor(Math.random()*BUTTERFLY_MESSAGES.length)]);
+    layer.appendChild(el);
+  }
+}
+
+function buildClouds(){
+  const layer=document.getElementById('clouds-layer');
+  layer.innerHTML='';
+  [{y:'8%',dur:'45s',delay:'0s',size:80},{y:'15%',dur:'65s',delay:'20s',size:60},{y:'5%',dur:'55s',delay:'35s',size:70}].forEach(c=>{
+    const el=document.createElement('div');
+    el.className='cloud';
+    el.style.cssText=`top:${c.y};animation-duration:${c.dur};animation-delay:${c.delay};`;
+    el.innerHTML=`<svg width="${c.size}" height="${c.size*0.6}" viewBox="0 0 80 48"><ellipse cx="40" cy="30" rx="35" ry="18" fill="rgba(255,255,255,0.85)"/><ellipse cx="25" cy="26" rx="22" ry="16" fill="rgba(255,255,255,0.85)"/><ellipse cx="55" cy="24" rx="20" ry="14" fill="rgba(255,255,255,0.85)"/></svg>`;
+    layer.appendChild(el);
+  });
+}
+
+function buildStars(night){
+  const layer=document.getElementById('stars-layer');
+  layer.innerHTML='';
+  if(!night)return;
+  for(let i=0;i<60;i++){
+    const el=document.createElement('div');
+    el.className='star visible';
+    const size=1+Math.random()*2.5;
+    el.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*55}%;width:${size}px;height:${size}px;--dur:${1.5+Math.random()*2.5}s;--op:${0.4+Math.random()*0.6};animation-delay:${Math.random()*3}s`;
+    layer.appendChild(el);
+  }
+}
+
+function buildFireflies(night){
+  const layer=document.getElementById('fireflies-layer');
+  layer.innerHTML='';
+  if(!night)return;
+  for(let i=0;i<8;i++){
+    const el=document.createElement('div');
+    el.className='firefly night-visible';
+    el.style.cssText=`left:${10+Math.random()*80}%;top:${40+Math.random()*40}%;--dur:${3+Math.random()*4}s;--dx1:${(Math.random()-.5)*40}px;--dy1:${(Math.random()-.5)*30}px;--dx2:${(Math.random()-.5)*30}px;--dy2:${(Math.random()-.5)*25}px;--dx3:${(Math.random()-.5)*35}px;--dy3:${(Math.random()-.5)*28}px;animation-delay:${Math.random()*4}s`;
+    layer.appendChild(el);
+  }
+}
+
+function buildBirds(night){
+  const layer=document.getElementById('birds-layer');
+  layer.innerHTML='';
+  if(night)return;
+  ['🐦','🕊️','🐦'].forEach((b,i)=>{
+    const el=document.createElement('div');
+    el.className='bird';
+    el.style.cssText=`top:${12+i*8}%;--dur:${8+i*3}s;animation-delay:${i*4}s`;
+    el.textContent=b;
+    layer.appendChild(el);
+  });
+}
+
+function buildLanterns(night){
+  const layer=document.getElementById('lanterns-layer');
+  layer.innerHTML='';
+  [{left:'5%',top:'20%'},{left:'90%',top:'15%'},{left:'50%',top:'12%'}].forEach((p,i)=>{
+    const el=document.createElement('div');
+    el.className='lantern'+(night?' visible':'');
+    el.style.cssText=`left:${p.left};top:${p.top};--dur:${2.5+i*0.5}s;animation-delay:${i*0.8}s;z-index:8;`;
+    el.textContent='🏮';
+    layer.appendChild(el);
+  });
+}
+
+function buildSparkles(){
+  const layer=document.getElementById('sparkles-layer');
+  layer.innerHTML='';
+  const emojis=['✨','⭐','🌟','💫','✦'];
+  for(let i=0;i<12;i++){
+    const el=document.createElement('div');
+    el.className='sparkle';
+    el.style.cssText=`left:${Math.random()*100}%;top:${10+Math.random()*80}%;--dur:${2+Math.random()*4}s;--sz:${0.6+Math.random()*0.8}rem;animation-delay:${Math.random()*5}s`;
+    el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    layer.appendChild(el);
+  }
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function applyTheme(night){
+  const sky=document.getElementById('sky');
+  const sun=document.getElementById('sun');
+  const moon=document.getElementById('moon');
+  if(night){
+    sky.classList.add('night');
+    sun.style.display='none';
+    moon.classList.add('visible');
+  }else{
+    sky.classList.remove('night');
+    sun.style.display='block';
+    moon.classList.remove('visible');
+  }
+  buildStars(night);
+  buildFireflies(night);
+  buildBirds(night);
+  buildLanterns(night);
+}
+
+function enterGarden(){
+  const w=document.getElementById('welcome');
+  w.classList.add('fade-out');
+  setTimeout(()=>{
+    w.style.display='none';
+    document.getElementById('garden').style.display='block';
+    initGarden();
+  },1500);
+}
+
+function initGarden(){
+  const dayNum=getDayNumber();
+  const night=isNight();
+  document.getElementById('hud-day').textContent=`Day ${dayNum}`;
+  applyTheme(night);
+  buildClouds();
+  buildSparkles();
+  buildButterflies();
+  buildFlowers(dayNum);
+  growTree(dayNum);
+  setTimeout(()=>{
+    const greetings=[
+      'Welcome back, Hamshi🌸',
+      'Your garden missed you 🌿',
+      'Assalamu Alaikum! ✨',
+      'A new flower is waiting for you 🌸'
+    ];
+    showToast(greetings[(dayNum-1)%greetings.length]);
+  },1200);
+}
+</script>
+</body>
+</html>
