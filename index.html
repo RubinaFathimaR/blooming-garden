@@ -705,5 +705,476 @@ function initGarden(){
   },1200);
 }
 </script>
+<!-- 🔥 FIRE MODE v2 — paste before </body> -->
+<style>
+#rubina-panel{
+  position:fixed;bottom:20px;right:20px;z-index:9000;
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+}
+#rubina-toggle{
+  background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);
+  border-radius:50px;padding:6px 10px;font-size:.65rem;
+  color:rgba(255,255,255,0.3);cursor:pointer;font-family:'Lato',sans-serif;
+  transition:all .3s;user-select:none;
+}
+#rubina-toggle:hover{background:rgba(255,255,255,0.25);color:rgba(255,255,255,0.6);}
+#rubina-controls{
+  background:white;border-radius:16px;padding:16px;
+  border:1px solid #F0E8D8;box-shadow:0 8px 32px rgba(0,0,0,.15);
+  display:none;min-width:220px;
+}
+#rubina-controls.open{display:block;}
+.rubina-label{
+  font-family:'Dancing Script',cursive;font-size:.85rem;
+  color:#8B7066;margin-bottom:10px;display:block;text-align:center;
+}
+#fire-btn{
+  width:100%;padding:10px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#FF6B35,#FF3B00);
+  color:white;cursor:pointer;
+  font-family:'Dancing Script',cursive;font-size:1.1rem;
+  transition:all .3s;margin-bottom:8px;
+  box-shadow:0 4px 16px rgba(255,59,0,.4);
+}
+#fire-btn:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(255,59,0,.6);}
+#extinguish-btn{
+  width:100%;padding:10px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#8FAF8A,#5E7A5A);
+  color:white;cursor:pointer;
+  font-family:'Dancing Script',cursive;font-size:1.1rem;
+  transition:all .3s;display:none;margin-bottom:8px;
+  box-shadow:0 4px 16px rgba(143,175,138,.4);
+}
+#extinguish-btn:hover{transform:scale(1.04);}
+
+/* Treaty modal */
+#treaty-overlay{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s;padding:16px;
+}
+#treaty-overlay.open{opacity:1;pointer-events:auto;}
+#treaty-paper{
+  background:linear-gradient(145deg,#FFFDF8,#FBF5E8);
+  border-radius:20px;max-width:440px;width:100%;
+  padding:32px;border:2px solid #8FAF8A;
+  transform:scale(.9);transition:transform .4s;
+  box-shadow:0 20px 60px rgba(0,0,0,.4);
+  position:relative;max-height:88vh;overflow-y:auto;
+}
+#treaty-overlay.open #treaty-paper{transform:scale(1);}
+.treaty-title{
+  font-family:'Dancing Script',cursive;font-size:1.8rem;
+  color:#5E7A5A;text-align:center;margin-bottom:4px;
+}
+.treaty-sub{font-size:.8rem;color:#8B7066;text-align:center;margin-bottom:20px;line-height:1.5;}
+.treaty-check{
+  display:flex;align-items:flex-start;gap:10px;
+  margin-bottom:14px;cursor:pointer;padding:8px;border-radius:8px;
+  transition:background .2s;
+}
+.treaty-check:hover{background:rgba(143,175,138,.1);}
+.treaty-check input[type=checkbox]{
+  width:18px;height:18px;margin-top:2px;accent-color:#8FAF8A;
+  cursor:pointer;flex-shrink:0;
+}
+.treaty-check label{
+  font-size:.9rem;color:#5A4035;line-height:1.5;cursor:pointer;
+}
+.treaty-check label.checked{
+  text-decoration:line-through;color:#8B7066;
+}
+#treaty-sign{
+  width:100%;padding:12px;border:none;border-radius:12px;
+  background:#ccc;color:white;
+  font-family:'Dancing Script',cursive;font-size:1.2rem;
+  cursor:not-allowed;margin-top:16px;
+  transition:all .3s;
+}
+#treaty-sign.ready{
+  background:linear-gradient(135deg,#8FAF8A,#5E7A5A);
+  cursor:pointer;box-shadow:0 4px 16px rgba(143,175,138,.5);
+}
+#treaty-sign.ready:hover{transform:translateY(-2px);}
+.treaty-warning{
+  background:#FFF3CD;border:1px solid #FFD700;border-radius:10px;
+  padding:10px 14px;margin-bottom:16px;font-size:.8rem;
+  color:#7B6000;text-align:center;line-height:1.5;
+}
+#treaty-paper::-webkit-scrollbar{width:4px;}
+#treaty-paper::-webkit-scrollbar-thumb{background:#D4C4B4;border-radius:4px;}
+
+/* Fire animations */
+.fire-ember{
+  position:fixed;pointer-events:none;z-index:8500;
+  font-size:var(--sz,1.2rem);
+  animation:emberFly var(--dur,3s) ease-in forwards;
+}
+@keyframes emberFly{
+  0%{opacity:1;transform:translate(0,0) rotate(0deg) scale(1)}
+  60%{opacity:.9}
+  100%{opacity:0;transform:translate(var(--tx,0px),var(--ty,-300px)) rotate(var(--rot,360deg)) scale(0.2)}
+}
+.fire-flicker{
+  position:fixed;bottom:0;left:0;right:0;height:40%;
+  pointer-events:none;z-index:8000;
+  background:linear-gradient(0deg,rgba(255,40,0,.4) 0%,rgba(255,100,0,.2) 50%,transparent 100%);
+  animation:flickerBg .35s ease-in-out infinite alternate;
+  display:none;
+}
+@keyframes flickerBg{from{opacity:.6}to{opacity:1}}
+#storm-sky{
+  position:fixed;inset:0;z-index:7900;pointer-events:none;
+  background:linear-gradient(180deg,#1a0500 0%,#2d0f00 60%,#1a0800 100%);
+  opacity:0;transition:opacity 2s;display:none;
+}
+#storm-sky.active{opacity:1;}
+.angry-rain{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  pointer-events:none;z-index:8100;display:none;overflow:hidden;
+}
+.raindrop{
+  position:absolute;top:-10px;width:2px;border-radius:2px;
+  background:linear-gradient(180deg,transparent,rgba(255,80,0,.5));
+  animation:rainFall linear infinite;
+}
+@keyframes rainFall{from{transform:translateY(-10px)}to{transform:translateY(110vh)}}
+#chaos-banner{
+  position:fixed;top:0;left:0;right:0;z-index:8600;
+  padding:10px;text-align:center;
+  font-family:'Dancing Script',cursive;font-size:1.05rem;color:white;
+  display:none;
+  background:linear-gradient(90deg,#FF3B00,#FF6B00,#FF3B00);
+  background-size:200%;
+  animation:bannerMove 2s linear infinite, bannerPulse .8s ease-in-out infinite alternate;
+}
+@keyframes bannerPulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}
+@keyframes bannerMove{from{background-position:0%}to{background-position:200%}}
+
+/* treaty-required blocker — shown to hamshi, not rubina */
+#treaty-required{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  z-index:8700;pointer-events:auto;display:none;
+}
+#treaty-required-btn{
+  background:white;border:2px solid #FF6B00;
+  border-radius:50px;padding:12px 28px;
+  font-family:'Dancing Script',cursive;font-size:1.1rem;
+  color:#FF3B00;cursor:pointer;
+  box-shadow:0 4px 20px rgba(255,59,0,.4);
+  animation:btnShake 2s ease-in-out infinite;
+}
+@keyframes btnShake{
+  0%,100%{transform:rotate(0deg)}
+  20%{transform:rotate(-2deg)}
+  40%{transform:rotate(2deg)}
+  60%{transform:rotate(-1deg)}
+  80%{transform:rotate(1deg)}
+}
+
+/* Peace bloom */
+#peace-restored{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;
+  display:none;align-items:center;justify-content:center;
+}
+#peace-restored.show{display:flex;animation:peaceBloom 3s ease forwards;}
+@keyframes peaceBloom{
+  0%{background:rgba(255,255,255,0)}
+  40%{background:rgba(255,255,255,.95)}
+  80%{background:rgba(255,255,255,.6)}
+  100%{background:rgba(255,255,255,0)}
+}
+.peace-text{
+  font-family:'Dancing Script',cursive;font-size:2.2rem;
+  color:#5E7A5A;text-align:center;
+  animation:peaceTextFade 3s ease forwards;
+}
+@keyframes peaceTextFade{
+  0%{opacity:0;transform:scale(.8)}
+  30%{opacity:1;transform:scale(1.05)}
+  75%{opacity:1}
+  100%{opacity:0}
+}
+</style>
+
+<!-- Fire overlays -->
+<div id="storm-sky"></div>
+<div class="fire-flicker" id="fire-flicker"></div>
+<div class="angry-rain" id="angry-rain"></div>
+<div id="chaos-banner"></div>
+
+<!-- Hamshi-facing treaty button (shown during fire) -->
+<div id="treaty-required">
+  <button id="treaty-required-btn" onclick="openTreaty()">
+    🔥 sign the peace treaty to save your garden 🔥
+  </button>
+</div>
+
+<!-- Treaty modal -->
+<div id="treaty-overlay">
+  <div id="treaty-paper">
+    <div class="treaty-title">🕊️ The Peace Treaty</div>
+    <div class="treaty-warning">
+      ⚠️ rubina has activated fire mode.<br>
+      your garden will remain on fire until you agree to ALL of the below.
+    </div>
+    <div class="treaty-sub">tick every box. no skipping. she will know.</div>
+    <div id="treaty-items"></div>
+    <button id="treaty-sign" onclick="signTreaty()" disabled>tick everything first 🙄</button>
+  </div>
+</div>
+
+<!-- Peace restored flash -->
+<div id="peace-restored"><div class="peace-text">🌸 alhamdulillah 🌸<br><span style="font-size:1.2rem">the garden forgives you, hamshi</span></div></div>
+
+<!-- Rubina's secret 🔑 panel -->
+<div id="rubina-panel">
+  <div id="rubina-controls">
+    <span class="rubina-label">🔐 rubina's controls</span>
+    <button id="fire-btn" onclick="activateFireAndSave()">🔥 burn it down</button>
+    <button id="extinguish-btn" onclick="extinguishAndSave()">🌸 forgive her (ugh)</button>
+  </div>
+  <button id="rubina-toggle" onclick="togglePanel()">🔑</button>
+</div>
+
+<script>
+(function(){
+
+const FIRE_KEY='garden_fire_mode';
+
+// ── panel ────────────────────────────────────────────────
+let panelOpen=false;
+function togglePanel(){
+  panelOpen=!panelOpen;
+  document.getElementById('rubina-controls').classList.toggle('open',panelOpen);
+}
+window.togglePanel=togglePanel;
+
+// ── chaos content ────────────────────────────────────────
+const CHAOS_MESSAGES=[
+  '🔥 THE GARDEN IS ON FIRE AND IT IS YOUR FAULT 🔥',
+  '💀 she did not reply. we burn. 💀',
+  '🔥 this is what happens when you ghost rubina 🔥',
+  '😤 rubina has LEFT THE CHAT (and lit everything on fire) 😤',
+  '🔥 sign the treaty or the flowers suffer 🔥',
+  '💅 the cat has also chosen rubina\'s side 💅',
+  '😭 even the bench is disappointed in you hamshi 😭',
+  '🌋 no peace until you click that button below 🌋',
+];
+
+const CHAOS_TOASTS=[
+  'the flowers are crying rn 🌸🔥',
+  'even the bench is upset with you',
+  'the cat: 😾 (rubina\'s side)',
+  'this is NOT how you treat your favourite sister',
+  'the butterflies have evacuated 🦋💨',
+  'our tree is literally on fire hamshi',
+  'scroll down and sign the treaty bestie',
+  'the garden remembers EVERYTHING',
+  'rubina rated this argument 10/10 very fun',
+  'ur flowers are WILTING hamshi do something',
+];
+
+const TREATY_ITEMS=[
+  {id:'t1',text:'I will not ghost rubina for more than 24 hours. ever again. starting now.'},
+  {id:'t2',text:'I will text her first at least once a week. minimum. non-negotiable.'},
+  {id:'t3',text:'I acknowledge that rubina is, objectively, the better and more patient sister'},
+  {id:'t4',text:'I will stop showing attitude'},
+  {id:'t5',text:'I will send a voice note within 48 hours of signing this treaty'},
+  {id:'t6',text:'I will prioritize rubina over my friends'},
+  {id:'t7',text:'I hereby declare rubina fully innocent in this matter 💅 (legally binding)'},
+];
+
+// ── fire state ───────────────────────────────────────────
+function isFireActive(){
+  try{return localStorage.getItem(FIRE_KEY)==='true';}catch(e){return false;}
+}
+function setFireState(val){
+  try{localStorage.setItem(FIRE_KEY,val?'true':'false');}catch(e){}
+}
+
+// ── visual fire ──────────────────────────────────────────
+let emberInterval=null;
+let bannerInterval=null;
+let toastInterval=null;
+
+function renderFire(){
+  // dark sky
+  const storm=document.getElementById('storm-sky');
+  storm.style.display='block';
+  setTimeout(()=>storm.classList.add('active'),50);
+
+  // fire flicker
+  document.getElementById('fire-flicker').style.display='block';
+
+  // ember rain
+  const rain=document.getElementById('angry-rain');
+  rain.style.display='block';
+  rain.innerHTML='';
+  for(let i=0;i<35;i++){
+    const drop=document.createElement('div');
+    drop.className='raindrop';
+    const h=15+Math.random()*50;
+    drop.style.cssText=`left:${Math.random()*100}%;height:${h}px;animation-duration:${0.5+Math.random()*0.7}s;animation-delay:${Math.random()*2}s;opacity:${0.4+Math.random()*0.5}`;
+    rain.appendChild(drop);
+  }
+
+  // chaos banner
+  const banner=document.getElementById('chaos-banner');
+  banner.style.display='block';
+  let msgIdx=0;
+  banner.textContent=CHAOS_MESSAGES[0];
+  bannerInterval=setInterval(()=>{
+    msgIdx=(msgIdx+1)%CHAOS_MESSAGES.length;
+    banner.textContent=CHAOS_MESSAGES[msgIdx];
+  },2500);
+
+  // flying embers
+  const emojis=['🔥','💀','😤','🌋','💢','🔥','🔥','😭','🔥'];
+  emberInterval=setInterval(()=>{
+    const em=document.createElement('div');
+    em.className='fire-ember';
+    const sz=0.8+Math.random()*1.4;
+    em.style.cssText=`left:${Math.random()*100}%;bottom:${Math.random()*45}%;--sz:${sz}rem;--dur:${1.5+Math.random()*2}s;--tx:${(Math.random()-.5)*300}px;--ty:${-(150+Math.random()*350)}px;--rot:${(Math.random()-.5)*720}deg;animation-delay:${Math.random()*0.3}s`;
+    em.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    document.body.appendChild(em);
+    setTimeout(()=>em.remove(),4000);
+  },250);
+
+  // chaos toasts
+  let tIdx=0;
+  showToast(CHAOS_TOASTS[0]);
+  toastInterval=setInterval(()=>{
+    tIdx=(tIdx+1)%CHAOS_TOASTS.length;
+    showToast(CHAOS_TOASTS[tIdx]);
+  },4500);
+
+  // scorch the garden
+  document.getElementById('cat').textContent='😾';
+  document.getElementById('cat').style.animationDuration='.4s';
+  document.querySelectorAll('.flower-svg').forEach(f=>{
+    f.style.filter='sepia(1) hue-rotate(-20deg) brightness(0.5)';
+  });
+  const canopy=document.getElementById('tree-canopy');
+  canopy.textContent='🔥';
+  canopy.style.background='radial-gradient(circle,#FF6B00,#FF3B00)';
+
+  // show treaty button for hamshi
+  document.getElementById('treaty-required').style.display='block';
+
+  // update rubina's panel buttons
+  document.getElementById('fire-btn').style.display='none';
+  document.getElementById('extinguish-btn').style.display='block';
+}
+
+function clearFire(){
+  clearInterval(emberInterval);
+  clearInterval(bannerInterval);
+  clearInterval(toastInterval);
+  emberInterval=bannerInterval=toastInterval=null;
+
+  const storm=document.getElementById('storm-sky');
+  storm.classList.remove('active');
+  setTimeout(()=>{storm.style.display='none';},2000);
+  document.getElementById('fire-flicker').style.display='none';
+  document.getElementById('angry-rain').style.display='none';
+  document.getElementById('chaos-banner').style.display='none';
+  document.getElementById('treaty-required').style.display='none';
+
+  document.getElementById('cat').textContent='🐱';
+  document.getElementById('cat').style.animationDuration='4s';
+  document.querySelectorAll('.flower-svg').forEach(f=>{f.style.filter='';});
+
+  // restore tree
+  const dayNum=typeof getDayNumber==='function'?getDayNumber():1;
+  const canopy=document.getElementById('tree-canopy');
+  canopy.style.background='radial-gradient(circle at 40% 40%,#4A8A3E,#2E6B25)';
+  if(dayNum>=365)canopy.textContent='🌳';
+  else if(dayNum>=100)canopy.textContent='🌲';
+  else if(dayNum>=30)canopy.textContent='🌴';
+  else canopy.textContent='🌸';
+
+  document.getElementById('fire-btn').style.display='block';
+  document.getElementById('extinguish-btn').style.display='none';
+}
+
+// ── rubina's buttons ─────────────────────────────────────
+function activateFireAndSave(){
+  setFireState(true);
+  renderFire();
+  panelOpen=false;
+  document.getElementById('rubina-controls').classList.remove('open');
+  showToast('🔥 fire mode saved. hamshi will see this tomorrow 😈');
+}
+function extinguishAndSave(){
+  setFireState(false);
+  clearFire();
+  panelOpen=false;
+  document.getElementById('rubina-controls').classList.remove('open');
+  showToast('🌸 you forgave her. very big of you rubina.');
+}
+window.activateFireAndSave=activateFireAndSave;
+window.extinguishAndSave=extinguishAndSave;
+
+// ── treaty ───────────────────────────────────────────────
+function openTreaty(){
+  const items=document.getElementById('treaty-items');
+  items.innerHTML=TREATY_ITEMS.map(t=>`
+    <div class="treaty-check" onclick="toggleTreatyItem('${t.id}')">
+      <input type="checkbox" id="${t.id}">
+      <label id="lbl-${t.id}">${t.text}</label>
+    </div>
+  `).join('');
+  document.getElementById('treaty-overlay').classList.add('open');
+}
+
+function toggleTreatyItem(id){
+  const cb=document.getElementById(id);
+  cb.checked=!cb.checked;
+  document.getElementById('lbl-'+id).classList.toggle('checked',cb.checked);
+  const all=TREATY_ITEMS.every(t=>document.getElementById(t.id)?.checked);
+  const btn=document.getElementById('treaty-sign');
+  btn.disabled=!all;
+  btn.classList.toggle('ready',all);
+  btn.textContent=all?'✍️ I sign this with my whole heart 🌸':'tick everything first 🙄';
+}
+
+function signTreaty(){
+  document.getElementById('treaty-overlay').classList.remove('open');
+  setFireState(false);
+  clearFire();
+  // peace bloom
+  const pr=document.getElementById('peace-restored');
+  pr.style.display='flex';
+  setTimeout(()=>pr.classList.add('show'),50);
+  setTimeout(()=>{pr.classList.remove('show');pr.style.display='none';},3500);
+  setTimeout(()=>showToast('🌸 welcome back hamshi. your garden missed you.'),1000);
+}
+
+window.openTreaty=openTreaty;
+window.toggleTreatyItem=toggleTreatyItem;
+window.signTreaty=signTreaty;
+window.closeTreaty=function(){document.getElementById('treaty-overlay').classList.remove('open');};
+
+// ── auto-check on load ───────────────────────────────────
+function checkFireOnLoad(){
+  if(document.getElementById('garden').style.display==='none') return;
+  if(isFireActive()) renderFire();
+  else{
+    document.getElementById('fire-btn').style.display='block';
+    document.getElementById('extinguish-btn').style.display='none';
+  }
+}
+
+// hook into existing enterGarden
+const _origEnter=window.enterGarden;
+window.enterGarden=function(){
+  _origEnter();
+  setTimeout(checkFireOnLoad, 2000);
+};
+
+})();
+</script>
 </body>
 </html>
