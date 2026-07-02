@@ -1142,9 +1142,8 @@ function toggleTreatyItem(id){
 
 function signTreaty(){
   document.getElementById('treaty-overlay').classList.remove('open');
-  setFireState(false);
+  try{ localStorage.setItem('garden_pardoned','true'); }catch(e){}
   clearFire();
-  // peace bloom
   const pr=document.getElementById('peace-restored');
   pr.style.display='flex';
   setTimeout(()=>pr.classList.add('show'),50);
@@ -1160,8 +1159,10 @@ window.closeTreaty=function(){document.getElementById('treaty-overlay').classLis
 // ── auto-check on load ───────────────────────────────────
 function checkFireOnLoad(){
   if(document.getElementById('garden').style.display==='none') return;
-  if(isFireActive()) renderFire();
-  else{
+  const pardoned=localStorage.getItem('garden_pardoned')==='true';
+  if(!pardoned){
+    renderFire();
+  } else {
     document.getElementById('fire-btn').style.display='block';
     document.getElementById('extinguish-btn').style.display='none';
   }
